@@ -1,0 +1,253 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="zh-cn">
+
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <link href="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="css/index.css">
+
+    
+</head>
+
+<body>
+    <div class="container-fluid" id="app">
+
+        <div class="row">
+            <!-- <h3 class="title">打造属于自己的照片墙吧！支持单张和多张上传哦~</h3> -->
+           
+                
+            
+                <div class="col-s-8">
+                    <button class="btn" type="button" name="button" @click="show">全部图片</button>
+                    <button class="btn" type="button" name="button" @click="category">显示全部分类</button>
+                    <span v-for="category in categorys" style=" height: 50px;">
+                        <span><button class="btn" type="button" @click="findbycategoryid(category.id)" style=" width: 70px;">{{category.name}}</button></span>
+                    </span>
+                </br>
+                
+                <ul class="result-container">
+                    
+                    <li v-for='item in imageList' :key='item.name'>
+                        <div class="image-item" :style="{'background-image': 'url('+item.url+')'}"></div>
+                        <p class="name">{{item.name}}</p>
+                        <a class="edit-icon" @click="update(item.id)">编辑</a>
+                        <a class="edit-icon" @click="del(item.id,item.categoryId)">删除</a>
+                    </li>
+
+                </ul>
+            </div>
+            <div class="col-s-4" style="text-align: center;">
+                <div >
+                    <form action="http://localhost:8080/image/fileUpload" method="POST" id="uploadForm" enctype="multipart/form-data">
+                        <div id="fileId" style='display: none'>
+                      
+                        </div>
+                        <div id="img-con" class="panel panel-default imgdiv">
+                      
+                      
+                        </div>
+                        <p id="em" ></p>
+                        <input type="button" style="height:40px; border:1px solid #629753; width:100px;" value="添加图片" name="点击事件" onclick="inputClieck()"><br>
+                    </br>
+                        <input type="submit" style="height:40px; border:1px solid #68ca4f; width:100px;">
+                      </form>
+                </div>
+                
+            </div>
+        </div>
+
+    </div>
+
+</body>
+
+</html>
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+<script src="https://cdn.staticfile.org/vue/2.2.2/vue.min.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="js/axios.min.js"></script>
+
+<script>
+  
+    var inputArray = [];
+  
+    function inputClieck() {
+      var newInput = document.createElement("input");
+      newInput.type = 'file';
+      newInput.name = "files";
+      var idid = new Date().getTime();
+      newInput.id = idid;
+      $("#fileId").append(newInput);
+      inputArray.push(idid);
+  
+      $("#" + idid).click();
+  
+      $("#" + idid).change(function (e) {
+        console.log('change事件', e);
+        console.log(this)
+        var path= getImgPath(this.files[0]);
+        console.log("--------"+path);
+  
+        var arr = path.split("/");
+        var strPath='--------:null/'+arr[arr.length-1];
+        console.log(strPath)
+        var a=createImg(path,idid);
+        $("#em").append(a)
+  
+      });
+      var newline = document.createElement("br");//创建一个BR标签是为能够换行！
+      $("#fileId").append(newline);
+    }
+  
+    //动态显示上传图片
+    function uploadImg(path) {
+      var imgDiv = $("#img-con");
+      var $img = $("<img/>");
+     $img.attr("src", path);
+      imgDiv.append($img);
+    }
+  
+ 
+  
+  
+    //获取要上传单张图片的本地路径
+    function getImgPath(file) {
+  
+  
+      var url = null;
+      if(window.createObjectURL != undefined) { // basic
+        url = window.createObjectURL(file);
+      } else if(window.URL != undefined) { // mozilla(firefox)
+        url = window.URL.createObjectURL(file);
+      } else if(window.webkitURL != undefined) { // webkit or chrome
+        url = window.webkitURL.createObjectURL(file);
+      }
+      return url;
+    }
+  
+  
+  
+  
+    function createImg(src,idid) {
+      var box = $("<div class='img-box uploadfile'>");
+  
+      var newImg = document.createElement("img");
+      newImg.src=src;
+      newImg.id="img"+idid;
+      newImg.height=100;
+      newImg.width=100;
+      newImg.onclick='showImagePopup(\"" + src + "\")';
+  
+      //box.append("<img src='" + src + "' height='100px' width='100px' onclick='showImagePopup(\"" + src + "\")'>");
+      box.append(newImg);
+      return box;
+   }
+ 
+  function showImagePopup(src) {
+     if (getClass(src) === "String") {
+      var popup = $("<img></img");
+      popup.addClass("image-popup").attr("src", src);
+       var shade = $("<div></div>").addClass("shade");
+       $(document.body).append(shade.append(popup));
+       shade.click(function () {
+        $(this).remove();
+      });
+       popup.fadeIn(200);
+      
+   }
+  }
+ 
+
+</script>
+
+<script>
+
+    const app = new Vue({
+        el: "#app",
+        data: {
+           
+        },
+        data() {
+            return {
+                selected: 0,
+                alpha: [
+                    { text: '风景', value: 1 },
+                    { text: '美女', value: 2 },
+                    { text: '汽车', value: 3 },
+                    { text: '动漫', value: 4 },
+                ],
+                imageList: [
+                    
+
+                ],
+                categorys: [
+
+                ]
+            }
+        },
+        mounted:function(){
+            this.show();
+        },
+        methods: {
+            show: function () {//展示所有的图片
+                console.log(111)
+                axios({
+                    method: 'get',
+                    url: 'http://localhost:8080/image/findall',
+
+                }).then((res) => {
+                    this.imageList = res.data.data;
+                    console.log(this.imageList);
+
+                });
+
+            },
+            category: function () {//查询出所有图片的分类
+                axios({
+                    method: 'get',
+                    url: 'http://localhost:8080/image/findCategory',
+
+                }).then((res) => {
+                    this.categorys = res.data.data;
+                });
+
+            },
+            findbycategoryid: function (id) {//分类查询图片
+
+                axios({
+                    method: 'get',
+                    url: 'http://localhost:8080/image/findbycategoryid?id=' + id,
+
+                }).then((res) => {
+
+                    this.imageList = res.data.data;
+
+
+                });
+            },
+            del: function (id, categoryId) {//根据id删除图片
+
+                axios({
+                    method: 'get',
+                    url: 'http://localhost:8080/image/delete?id=' + id,
+
+                }).then((res) => {
+
+                    if (res.data.status == 200) {
+
+                        this.findbycategoryid(categoryId);
+                    }
+                });
+            },
+            update: function (id) {//跳转页面编辑图片
+                    localStorage.setItem("id",id);
+                    window.location.href="update.html";
+                }
+
+        }
+    })
+
+
+</script>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<meta charset="utf-8">
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+	<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.js"></script> 
+    <script src="js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="https://cdn.staticfile.org/vue/2.2.2/vue.min.js"></script>
+    <script src="js/axios.min.js"></script>
+	<style>
+	#title{
+		height:80px;
+	}
+	#title_img{
+		position: relative;
+		top: 10px;
+	}
+	#title_order{
+		position: relative;top: 10px; font-size: 5px;
+	}
+	#title_ul1{
+		list-style-type: none;position: relative;text-align : right;
+	}
+	#title_ul2{
+		list-style-type: none;position: relative;text-align : right;
+	}
+	#about{
+		height:100px;
+	}
+	#login{
+		text-align:center;
+		margin: auto;
+
+	}
+	#login input{
+		margin-top: 20px;
+		width: 200px;
+	}
+	#login img{
+		position: relative;
+		margin-top: 30px;
+		width: 100px;
+		height:40px;
+	}
+	#content{
+		border: 1px solid black;
+		height:400px;
+		text-align:center;
+	}
+	
+	.submit{
+	width: 100px;
+	height:50px;
+	background-size: 100px 50px;
+	margin-left: 50px;
+	margin-top: 30px;
+	background-image: url("images/submit.png");
+	
+	}
+	.image{
+       
+       width: 200px;
+       height: 200px;
+      
+   }
+   .div2{
+        position: relative;
+        top: 50px;
+        width: 100%;
+        height: 200px;
+    }
+</style>
+</head>
+<body>
+	<div class="row" id="app" style="width: 100%;">
+		<div class="col-sm-2"></div>
+		<div class="col-sm-8">
+			<div class="container-fluid">
+				<div class="container">
+					<div class="row" id="title" >
+						
+					</div>
+				</div>
+				<div class="row" style="height:50px;">
+					<img src="images/tr_show_tdbg.gif" style="width: 100%;">
+				</div>
+				<div class=" a" style="height:50px;">
+					<p><b>可以更改图片信息和更换图片</b></p>
+					
+				</div>
+				<div class="row" id="content" >
+					<p style="position: relative; left: 20%;"><b>更改图片信息</b> </p>
+					<div class="col-sm-5"  id="login" >
+						<image :src="image.url" mode="" class="image"  ></image>
+                </br>
+            </br>
+                修改图片名称<input id="name" type="text"  v-model="name">
+                
+                </br>	
+					<button class="submit" @click="updatename()"></button>
+				
+					</div>
+					<div class="col-sm-1">
+						<img src="images/linebg.gif" style="text-align:center;height:400px;">
+					</div>
+				
+					
+					<div class="col-sm-5" id="logintoindex">
+						<p><b>更换图片</b> </p>
+						<div class="col-s-6" class="div2">
+                            <label for="imgfile">
+                                <div style="background-color: rgba(149, 158, 159, 0.86);">
+                                        <div id="upload-tip">+</div>
+                                        <img src="" alt="" id="img-show" style="display: none;width: 100px;height: 100px;" >
+                                        <input type="file" id="imgfile" ref="myFile" style="display: none" onchange="imgfileChange()">
+                                    </div>
+                            </label>
+                            <div class="select-container">
+                                <label for="type" >请选择图片类型: </label>
+                                </br>
+                                <select id="type" class="select" v-model="selected">
+                                    <option value="" v-for="i in alpha" :value="i"  >{{i.text}}</option>
+                                </select>
+                                <span  style="display:none">{{selected.value}}</span>
+                            </div>
+                        </br>
+                            <button class="btn" type="button" @click="add" >更换图片</button>&emsp;
+                        </label>
+                        </div>
+						
+					</div>
+
+				</div>
+				
+			</div>
+		</div>
+		<div class="col-sm-2"></div>
+	</div>
+	<script>
+        function imgfileChange() {
+            var upload_tip = document.getElementById("upload-tip");
+            var img_show = document.getElementById("img-show");
+            var imgfile = document.getElementById("imgfile");
+            var freader = new FileReader();
+            //开始读取指定的Blob中的内容。一旦完成，result属性中将包含一个data: URL格式的Base64字符串以表示所读取文件的内容。
+            freader.readAsDataURL(imgfile.files[0]);
+            /*       console.log(imgfile.files[0])*/
+            //处理load事件。该事件在读取操作完成时触发。
+            freader.onload = function (e) {
+                //  e.target.result;  就是data:image/jpeg;base64,+编码  就相当于直接解码
+                img_show.src = e.target.result;
+                /*console.log(e.target.result)*/
+                img_show.style.display = "block";
+                upload_tip.style.display = "none";
+            };
+
+        }
+    </script>
+
+</body>
+</html>
+<script>
+
+    const app = new Vue({
+        el: "#app",
+        data: {
+           
+        },
+        data() {
+            return {
+                image:'',
+                selected: 0,
+                alpha: [
+                    { text: '风景', value: 1 },
+                    { text: '美女', value: 2 },
+                    { text: '汽车', value: 3 },
+                    { text: '动漫', value: 4 },
+                ],
+                name:''
+            }
+        },
+        mounted:function(){
+           this.show();
+           
+        },
+        methods: {
+            show: function () {//根据id显示图片
+                let id = localStorage.getItem("id");
+                console.log(111)
+                axios({
+                    method: 'get',
+                    url: 'http://localhost:8080/image/findone?id='+id,
+
+                }).then((res) => {
+                    this.image = res.data.data;
+                    this.name=this.image.name;
+                    console.log(this.image);
+
+                });
+
+            },
+            updatename: function () {//更改图片名称
+                let id = this.image.id;
+                let name = this.name;
+                axios({
+                    method: 'get',
+                    url: 'http://localhost:8080/image/updatename?id='+id+'&name='+name,
+
+                }).then((res) => {
+                    
+                    if(res.data.status==200){
+                        alert(res.data.message);
+                        location.reload();
+                    }
+                    
+
+                });
+
+            },
+            add() {
+                //查找到存放文件的元素。
+                let myFile = this.$refs.myFile;
+                //type 为 file 的 input 元素内部有一个 files数组，里边存放了所有选择的 file，由于文件上传时，文件可以多选，因此这里拿到的 files 对象是一个数组。
+                let files = myFile.files;
+                //拿到编码之后的图片数据
+                //从 files对象中，获取自己要上传的文件，由于这里是单选，所以其实就是数组中的第一项。
+                let file = files[0];
+                if (file == null) {
+                    alert("还未选择图片");
+                    return;
+                }
+                let categoryId =this.selected.value;
+                let formData = new FormData();
+                formData.append("file", file);
+                formData.append("categoryId", categoryId);
+                formData.append("id",this.image.id);
+                //axios
+                axios({
+                    method: 'post',
+                    url: 'http://localhost:8080/image/update',
+                    data: formData,
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                }).then((res) => {
+                    console.log(res);
+                    if(res.data.status==200){
+                        location.reload();
+                    }
+                });
+            }
+
+        }
+    })
+
+
+</script>
